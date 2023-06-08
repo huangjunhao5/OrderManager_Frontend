@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_course_design/Components/DefaultAppBar.dart';
+import 'package:flutter_course_design/Components/Dialog.dart';
 import 'package:flutter_course_design/Components/ListItem.dart';
+import 'package:flutter_course_design/Exception/HttpException/PermissionDeniedException.dart';
 import 'package:flutter_course_design/Pages/routes/Inventory/InventoryDetailsPage.dart';
 import 'package:flutter_course_design/service/ProductService.dart';
+import 'package:flutter_course_design/service/UserService.dart';
 
+import '../../service/lib/Request.dart';
 import '../routes/Inventory/AddInventoryPage.dart';
 import '../test/TestPage.dart';
 
@@ -30,7 +34,16 @@ class _InventoryManagementPageState extends State<InventoryManagementPage> {
   }
 
   Future _initState() async {
-    inventoryList = await getAllProductInfo();
+    try{
+      inventoryList = await getAllProductInfo();
+    }catch(e){
+      if(e is PermissionDeniedException){
+        await PromptDialogFactory.create(context, '错误', PermissionDenied);
+        logout();
+      }else{
+        await PromptDialogFactory.create(context, '错误', ConnectionError);
+      }
+    }
     if (mounted) setState(() {});
   }
 
